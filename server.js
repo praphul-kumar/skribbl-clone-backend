@@ -36,6 +36,11 @@ io.on("connection", (socket) => {
         log("ROOM", "Room created", { roomId, creator: username });
 
         socket.emit("room-created", roomId);
+
+        socket.emit("room-data", {
+            players: room.players,
+            drawer: room.drawer,
+        });
         sendRoomData(roomId);
     });
 
@@ -57,6 +62,11 @@ io.on("connection", (socket) => {
         socket.join(roomId);
 
         log("ROOM", "Player joined", { roomId, username });
+
+        socket.emit("room-data", {
+            players: room.players,
+            drawer: room.drawer,
+        });
 
         sendRoomData(roomId);
 
@@ -205,6 +215,7 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         log("INFO", "User disconnected", { socketId: socket.id });
         removePlayer(socket.id);
+        // sendRoomData(roomId);
     });
 });
 
@@ -295,10 +306,12 @@ function sendRoomData(roomId) {
     const room = rooms[roomId];
     if (!room) return;
 
-    io.to(roomId).emit("room-data", {
-        players: room.players,
-        drawer: room.drawer,
-    });
+    setTimeout(() => {
+        io.to(roomId).emit("room-data", {
+            players: room.players,
+            drawer: room.drawer,
+        });
+    }, 0)
 }
 
 
